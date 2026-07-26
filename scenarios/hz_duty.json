@@ -1,0 +1,14 @@
+{
+  "id": "hz_duty",
+  "title": "Частота и скважность",
+  "function": "Logic Hz / Duty %",
+  "instructions": "Щупы на SIG_RAW/COM (прямой ШИМ, размах 3,3 В). Позиция mV, кнопкой SELECT дойдите до Hz, затем до Duty %.",
+  "steps": [
+    {"ms": 20000, "quantity": "hz",   "signal": {"hz": 100,    "duty": 50}, "hint": "100 Гц"},
+    {"ms": 20000, "quantity": "hz",   "signal": {"hz": 1000,   "duty": 50}, "hint": "1 кГц"},
+    {"ms": 20000, "quantity": "hz",   "signal": {"hz": 50000,  "duty": 50}, "hint": "50 кГц"},
+    {"ms": 20000, "quantity": "duty", "signal": {"hz": 1000,   "duty": 25}, "hint": "Скважность 25%"},
+    {"ms": 20000, "quantity": "duty", "signal": {"hz": 1000,   "duty": 75}, "hint": "Скважность 75%"},
+    {"ms": 20000, "quantity": "duty", "signal": {"hz": 1000,   "duty": 10}, "hint": "Скважность 10% — язык ШИМ-управления"}
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "id": "thermal_diff",
+  "title": "Температура: нагрев, остывание и T1-T2",
+  "function": "T1 / T2 / T1-T2",
+  "instructions": "T1 — термопара на нагревательной пластине (гнёзда V/COM). T2 — вторая термопара на воздухе (плюс в µA/mA, минус в A). Кнопкой RANGE листайте T1 → T2 → T1-T2. Включите REC, чтобы записать MAX/MIN/AVG за сценарий.",
+  "steps": [
+    {"ms": 60000,  "quantity": "degc", "heater": 0,  "fan": false, "hint": "Базовая температура: T1 и T2 должны совпадать"},
+    {"ms": 180000, "quantity": "degc", "heater": 60, "fan": false, "hint": "Нагрев: следите за ростом T1-T2"},
+    {"ms": 120000, "quantity": "degc", "heater": 0,  "fan": true,  "hint": "Остывание с вентилятором — REC покажет MAX"},
+    {"ms": 30000,  "quantity": "degc", "heater": 0,  "fan": false, "hint": "Готово. Посмотрите MAX/MIN/AVG"}
+  ]
+}

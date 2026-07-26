@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dmm-trainer"
+version = "0.3.0"
+description = "Сверка логов мультиметра Brymen BM788BT с эталоном стенда DMM Trainer"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+dependencies = []
+
+[project.optional-dependencies]
+plot = ["matplotlib>=3.7"]
+dev = ["pytest>=7.4"]
+
+[project.scripts]
+dmm-trainer = "dmm_trainer.cli:main"
+
+[tool.setuptools]
+packages = ["dmm_trainer"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

@@ -1,0 +1,15 @@
+{
+  "id": "dcv_ladder",
+  "title": "DCV: лестница напряжений и проверка точности 0,03%",
+  "function": "DCV",
+  "instructions": "Режим V⎓, красный щуп в V, чёрный в COM. Зафиксируйте предел кнопкой RANGE — плавающий автопредел портит статистику. Держите щупы на клеммах REF+/COM весь сценарий.",
+  "steps": [
+    {"ms": 5000,  "quantity": "dcv", "reference_tap": 0, "level_mv": 0,    "hint": "Ноль: посмотрите на остаточные показания"},
+    {"ms": 30000, "quantity": "dcv", "reference_tap": 1,                    "hint": "Эталон 2,500 В — это ваша проверка на 0,03% + 2 ед."},
+    {"ms": 30000, "quantity": "dcv", "reference_tap": 0, "level_mv": 1000,  "hint": "1 В с ЦАП"},
+    {"ms": 30000, "quantity": "dcv", "reference_tap": 0, "level_mv": 2000,  "hint": "2 В"},
+    {"ms": 30000, "quantity": "dcv", "reference_tap": 0, "level_mv": 3000,  "hint": "3 В — почти полная шкала ЦАП"},
+    {"ms": 20000, "quantity": "dcmv","reference_tap": 3,                    "hint": "25 мВ: переключитесь на позицию mV"},
+    {"ms": 5000,  "quantity": "dcv", "reference_tap": 0, "level_mv": 0,     "hint": "Возврат в ноль"}
+  ]
+}
