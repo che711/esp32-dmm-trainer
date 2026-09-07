@@ -1,0 +1,17 @@
+{
+  "id": "ohm_decade",
+  "title": "Сопротивление, прозвонка и nS",
+  "function": "Ohm / Continuity / nS",
+  "instructions": "Обесточенная цепь! Щупы на R+/COM. Перед первым шагом замкните щупы и нажмите REL — вычтете сопротивление проводов.",
+  "steps": [
+    {"ms": 20000, "quantity": "ohm", "decade": 0, "hint": "1 Ом: без REL погрешность щупов больше самого резистора"},
+    {"ms": 20000, "quantity": "ohm", "decade": 1, "hint": "100 Ом"},
+    {"ms": 20000, "quantity": "ohm", "decade": 2, "hint": "1 кОм — прозвонка молчать должна"},
+    {"ms": 20000, "quantity": "ohm", "decade": 3, "hint": "10 кОм"},
+    {"ms": 20000, "quantity": "ohm", "decade": 4, "hint": "1 МОм"},
+    {"ms": 20000, "quantity": "ohm", "decade": 5, "hint": "47 МОм — верхняя часть шкалы, точность падает"},
+    {"ms": 30000, "quantity": "ohm", "decade": 6, "hint": "1 ГОм: переключитесь в nS, должно быть около 1,00 nS"},
+    {"ms": 15000, "quantity": "ohm", "decade": 7, "hint": "Обрыв: OL. Прозвонка молчит"},
+    {"ms": 30000, "quantity": "ohm", "decade": 0, "chatter": true, "hint": "Дребезг: смотрите на барграф, потом попробуйте AutoHold"}
+  ]
+}

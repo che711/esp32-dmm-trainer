@@ -1,0 +1,14 @@
+{
+  "id": "loop_4_20",
+  "title": "Токовая петля 4-20 мА",
+  "function": "mA / %4-20mA",
+  "instructions": "ВНИМАНИЕ: красный щуп в гнездо µA/mA, прибор включается В РАЗРЫВ петли (клеммы LOOP+/LOOP-). Режим mA, кнопкой SELECT дойдите до %4-20mA.",
+  "steps": [
+    {"ms": 20000, "quantity": "loop_ma", "loop_percent": 0,   "hint": "4 мА = 0%"},
+    {"ms": 20000, "quantity": "loop_ma", "loop_percent": 25,  "hint": "8 мА = 25%"},
+    {"ms": 20000, "quantity": "loop_ma", "loop_percent": 50,  "hint": "12 мА = 50%"},
+    {"ms": 20000, "quantity": "loop_ma", "loop_percent": 75,  "hint": "16 мА = 75%"},
+    {"ms": 20000, "quantity": "loop_ma", "loop_percent": 100, "hint": "20 мА = 100%"},
+    {"ms": 20000, "quantity": "loop_ma", "loop_percent": 50,  "hint": "Обратно на 50% — проверьте гистерезис"}
+  ]
+}

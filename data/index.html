@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DMM Trainer</title>
+<style>
+:root{
+  --ink:#1C1F23; --panel:#fff; --paper:#F2F4F5; --line:#D8DDE1;
+  --red:#C8102E; --blue:#1E5C8A; --green:#2C6E49; --amber:#B0731A;
+  --lcd:#DEE7D8; --lcd-ink:#1F2C1B;
+  --mono:ui-monospace,"Cascadia Mono",Consolas,monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);
+  font:16px/1.55 "Segoe UI",Roboto,Arial,sans-serif}
+header{background:var(--ink);color:#EDEFF1;padding:14px 20px;border-bottom:5px solid var(--red);
+  display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+header h1{margin:0;font-size:19px;letter-spacing:-.01em}
+header .fw{font-family:var(--mono);font-size:12px;color:#9AA3AB}
+main{max-width:1080px;margin:0 auto;padding:18px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:820px){.grid{grid-template-columns:1fr}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+.card h2{margin:0 0 10px;font-size:15px;text-transform:uppercase;letter-spacing:.1em;
+  color:#4A5158;font-family:var(--mono)}
+.lcd{background:var(--lcd);color:var(--lcd-ink);border-radius:10px;padding:14px 18px;
+  box-shadow:inset 0 2px 8px rgba(0,0,0,.25)}
+.lcd .val{font-family:var(--mono);font-size:34px;font-weight:700;letter-spacing:.04em}
+.lcd .q{font-family:var(--mono);font-size:12px;text-transform:uppercase;letter-spacing:.16em}
+.hint{background:#FBF3E4;border:1px solid #E6D2AC;border-radius:10px;padding:10px 14px;margin-top:12px;font-size:15px}
+.progress{height:8px;background:var(--paper);border-radius:99px;overflow:hidden;margin:12px 0 6px}
+.progress i{display:block;height:100%;background:var(--red);width:0;transition:width .4s}
+button{font-family:var(--mono);font-size:13px;font-weight:700;border-radius:8px;
+  border:1.5px solid var(--ink);background:#fff;padding:7px 12px;cursor:pointer}
+button:hover{border-color:var(--red)}
+button.primary{background:var(--ink);color:#fff}
+button.danger{background:var(--red);color:#fff;border-color:var(--red)}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:8px 0}
+label.f{font-size:13px;color:#4A5158;min-width:104px;font-family:var(--mono)}
+input[type=number],select{font-family:var(--mono);font-size:13px;padding:5px 8px;
+  border:1px solid var(--line);border-radius:7px;background:#fff;min-width:92px}
+input[type=range]{flex:1;min-width:130px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin-top:6px}
+td,th{border-bottom:1px solid var(--line);padding:5px 8px;text-align:left}
+th{font-size:12px;text-transform:uppercase;color:#4A5158;font-family:var(--mono)}
+td.n{font-family:var(--mono);white-space:nowrap}
+.scn{display:flex;justify-content:space-between;align-items:center;gap:10px;
+  padding:9px 4px;border-bottom:1px solid var(--line)}
+.scn:last-child{border-bottom:none}
+.scn b{display:block;font-size:14.5px}
+.scn small{color:#4A5158;font-family:var(--mono);font-size:11.5px}
+.pill{font-family:var(--mono);font-size:11px;padding:2px 9px;border-radius:99px;
+  border:1px solid var(--line);color:#4A5158}
+.pill.on{background:var(--green);color:#fff;border-color:var(--green)}
+.pill.warn{background:var(--amber);color:#fff;border-color:var(--amber)}
+.note{font-size:13.5px;color:#4A5158;margin-top:8px}
+.ok{color:var(--green);font-weight:700}
+.bad{color:var(--red);font-weight:700}
+footer{max-width:1080px;margin:0 auto;padding:10px 18px 40px;color:#4A5158;font-size:13px}
+</style>
+</head>
+<body>
+<header>
+  <h1>DMM Trainer — стенд для Brymen BM788BT</h1>
+  <div class="fw"><span id="fw">…</span> · <span id="conn">подключаюсь…</span></div>
+</header>
+
+<main>
+<div class="grid">
+
+  <!-- ---------------- текущее состояние ---------------- -->
+  <section class="card">
+    <h2>Сейчас на клеммах</h2>
+    <div class="lcd">
+      <div class="q" id="q">—</div>
+      <div class="val" id="truth">—</div>
+    </div>
+    <div class="progress"><i id="bar"></i></div>
+    <div class="row" style="justify-content:space-between">
+      <span class="pill" id="runstate">простой</span>
+      <span class="pill" id="steplabel">шаг —</span>
+    </div>
+    <div class="hint" id="hint">Выберите сценарий справа. Стенд выставит известную величину, а вы измерите её мультиметром.</div>
+    <div class="row">
+      <button class="danger" onclick="post('/api/safe')">Безопасное состояние</button>
+      <button onclick="post('/api/scenario/stop')">Остановить</button>
+      <a href="/api/truth.csv" download><button class="primary">Скачать truth.csv</button></a>
+    </div>
+  </section>
+
+  <!-- ---------------- сценарии ---------------- -->
+  <section class="card">
+    <h2>Сценарии</h2>
+    <div id="scenarios">загрузка…</div>
+    <div class="note">Сценарий пишет эталон раз в секунду. После прогона скачайте
+      truth.csv и сверьте с CSV из приложения Brymen:
+      <code>dmm-trainer grade --meter export.csv --truth truth.csv</code></div>
+  </section>
+
+  <!-- ---------------- ручной режим ---------------- -->
+  <section class="card">
+    <h2>Ручной режим</h2>
+    <div class="row">
+      <label class="f">Опора</label>
+      <select id="ref" onchange="manual({reference_tap:+this.value})">
+        <option value="0">выкл</option><option value="1">2,500 В</option>
+        <option value="2">250 мВ</option><option value="3">25 мВ</option>
+      </select>
+    </div>
+    <div class="row">
+      <label class="f">ЦАП, мВ</label>
+      <input type="number" id="lvl" min="0" max="3300" step="10" value="0">
+      <button onclick="manual({level_mv:+lvl.value})">Выставить</button>
+    </div>
+    <div class="row">
+      <label class="f">Резистор</label>
+      <select id="dec" onchange="manual({decade:+this.value})"><option value="-1">выкл</option></select>
+    </div>
+    <div class="row">
+      <label class="f">Компонент</label>
+      <select id="cmp" onchange="manual({component:+this.value})"><option value="-1">выкл</option></select>
+    </div>
+    <div class="row">
+      <label class="f">Сигнал</label>
+      <input type="number" id="hz" value="1000" min="1" max="100000" title="частота, Гц">
+      <input type="number" id="duty" value="50" min="0" max="100" title="скважность, %">
+      <button onclick="manual({signal:{on:true,hz:+hz.value,duty:+duty.value}})">Вкл</button>
+      <button onclick="manual({signal:{on:false}})">Выкл</button>
+    </div>
+    <div class="row">
+      <label class="f">Петля, %</label>
+      <input type="range" id="loop" min="0" max="100" value="0"
+             oninput="loopv.textContent=this.value+'% / '+(4+this.value*0.16).toFixed(2)+' мА'"
+             onchange="manual({loop_percent:+this.value})">
+      <span class="n" id="loopv">0% / 4,00 мА</span>
+    </div>
+    <div class="row">
+      <label class="f">Нагрузки</label>
+      <button onclick="manual({loads:{led:true}})">10 мА</button>
+      <button onclick="manual({loads:{mid:true}})">500 мА</button>
+      <button onclick="manual({loads:{high:true}})">2,4 А</button>
+      <button onclick="manual({loads:{}})">снять</button>
+    </div>
+    <div class="row">
+      <label class="f">Прочее</label>
+      <button onclick="manual({ghost:true})">Фантом вкл</button>
+      <button onclick="manual({ghost:false})">выкл</button>
+      <button onclick="manual({chatter:true})">Дребезг</button>
+      <button onclick="manual({inrush_ms:400})">Инраш (CREST)</button>
+    </div>
+    <div class="row">
+      <label class="f">Нагрев, %</label>
+      <input type="range" min="0" max="100" value="0"
+             oninput="heatv.textContent=this.value+'%'" onchange="manual({heater:+this.value})">
+      <span class="n" id="heatv">0%</span>
+      <button onclick="manual({fan:true})">Вентилятор</button>
+      <button onclick="manual({fan:false})">стоп</button>
+    </div>
+  </section>
+
+  <!-- ---------------- найди неисправность ---------------- -->
+  <section class="card">
+    <h2>Найди неисправность</h2>
+    <p class="note" style="margin-top:0">Стенд вносит один скрытый дефект. Ваша задача —
+      найти его мультиметром и поставить диагноз.</p>
+    <div class="row">
+      <button class="primary" onclick="post('/api/fault/start')">Новый случай</button>
+      <button onclick="post('/api/fault/stop')">Сдаться / сброс</button>
+    </div>
+    <div class="hint" id="symptom">Случай не запущен.</div>
+    <div class="row">
+      <select id="answer"><option value="">— выберите диагноз —</option></select>
+      <button onclick="sendAnswer()">Ответить</button>
+    </div>
+    <div id="verdict" class="note"></div>
+  </section>
+
+  <!-- ---------------- состояние железа ---------------- -->
+  <section class="card" style="grid-column:1/-1">
+    <h2>Состояние железа</h2>
+    <table id="hw"><tbody></tbody></table>
+  </section>
+
+</div>
+</main>
+
+<footer>
+  Стенд рассчитан только на безопасные напряжения (≤24 В). Никогда не подключайте
+  его к сети 230 В — для этого есть розетка и глава 01 учебника.
+</footer>
+
+<script>
+const $ = id => document.getElementById(id);
+let failures = 0;
+
+async function api(path, body) {
+  const opt = body ? {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(body)
+  } : {};
+  const r = await fetch(path, opt);
+  if (!r.ok) throw new Error(await r.text());
+  return r.json();
+}
+
+async function post(path, body) {
+  try { render(await api(path, body || {})); }
+  catch (e) { $('verdict').innerHTML = '<span class="bad">Ошибка: ' + e.message + '</span>'; }
+}
+
+const manual = patch => post('/api/manual', patch);
+
+function fmt(value, quantity) {
+  if (value === null || value === undefined) return '—';
+  const units = {dcv:'В', dcmv:'мВ', acv:'В~', acdcv:'В', ohm:'Ом', ma:'мА',
+                 loop_ma:'мА', percent:'%', degc:'°C', hz:'Гц', duty:'%'};
+  const u = units[quantity] || '';
+  if (quantity === 'ohm' && Math.abs(value) >= 1e6) return (value/1e6).toFixed(3) + ' МОм';
+  if (quantity === 'ohm' && Math.abs(value) >= 1e3) return (value/1e3).toFixed(3) + ' кОм';
+  if (quantity === 'hz' && value >= 1000) return (value/1000).toFixed(3) + ' кГц';
+  return value.toFixed(Math.abs(value) < 10 ? 4 : 2) + ' ' + u;
+}
+
+function render(state) {
+  $('fw').textContent = 'v' + state.fw;
+  $('conn').textContent = 'на связи';
+  failures = 0;
+
+  const run = state.run;
+  $('q').textContent = run.quantity || '—';
+  $('truth').textContent = run.truth != null ? fmt(run.truth, run.quantity) : '—';
+  $('hint').textContent = run.hint || 'Стенд ждёт команды.';
+  $('steplabel').textContent = run.steps ? `шаг ${run.step + 1} из ${run.steps}` : 'шаг —';
+
+  const rs = $('runstate');
+  rs.textContent = {running: 'идёт сценарий', finished: 'сценарий завершён', idle: 'простой'}[run.state];
+  rs.className = 'pill' + (run.state === 'running' ? ' on' : run.state === 'finished' ? ' warn' : '');
+  $('bar').style.width = run.steps ? ((run.step + 1) / run.steps * 100) + '%' : '0';
+
+  const hw = state.hw;
+  const rows = [
+    ['Опора', hw.reference_tap ? fmt(hw.reference_mv, 'dcmv') : 'выкл'],
+    ['ЦАП', fmt(hw.level_mv, 'dcmv')],
+    ['Резистор', hw.decade_label],
+    ['Сигнал', hw.signal.on ? `${fmt(hw.signal.hz, 'hz')}, D=${hw.signal.duty}% · DC ${fmt(hw.signal.dc_mv, 'dcmv')} · AC ${fmt(hw.signal.ac_rms_mv, 'dcmv')} · AC+DC ${fmt(hw.signal.acdc_rms_mv, 'dcmv')} · крест ${hw.signal.crest.toFixed(2)}` : 'выкл'],
+    ['Петля', `${hw.loop_percent.toFixed(1)}% · ${hw.loop_ma.toFixed(2)} мА`],
+    ['Нагрузка', fmt(hw.load_ma, 'ma')],
+    ['Фантом', hw.ghost ? 'включён' : 'выкл'],
+    ['Дребезг', hw.chatter ? 'включён' : 'выкл'],
+    ['Нагрев / вентилятор', `${hw.heater}% / ${hw.fan ? 'вкл' : 'выкл'}`],
+    ['Эталон температуры', hw.reference_c != null ? fmt(hw.reference_c, 'degc') : 'нет DS18B20'],
+    ['Точек эталона', run.truth_samples],
+  ];
+  $('hw').querySelector('tbody').innerHTML =
+    rows.map(([k, v]) => `<tr><th>${k}</th><td class="n">${v}</td></tr>`).join('');
+
+  const f = state.fault;
+  if (f.active) {
+    $('symptom').textContent = 'Симптом: ' + f.symptom;
+    if (f.solved) {
+      $('verdict').innerHTML = `<span class="ok">Верно: ${f.title}</span><br>Как искать: ${f.method}`;
+    }
+  } else if (!f.solved) {
+    $('symptom').textContent = 'Случай не запущен.';
+    $('verdict').textContent = '';
+  }
+}
+
+async function sendAnswer() {
+  const id = $('answer').value;
+  if (!id) return;
+  const r = await api('/api/fault/answer', {id});
+  $('verdict').innerHTML = r.correct
+    ? `<span class="ok">Верно с ${r.attempts}-й попытки: ${r.title}</span><br>Как искать: ${r.method}`
+    : `<span class="bad">Не то (попытка ${r.attempts}). Измеряйте дальше.</span>`;
+}
+
+async function boot() {
+  const scenarios = await api('/api/scenarios');
+  $('scenarios').innerHTML = scenarios.map(s => `
+    <div class="scn">
+      <div><b>${s.title}</b><small>${s.function} · ${s.steps} шагов · ${s.id}</small></div>
+      <button class="primary" onclick="post('/api/scenario/start',{id:'${s.id}'})">Старт</button>
+    </div>`).join('') || 'Сценарии не найдены — залейте образ data/ и каталог scenarios/.';
+
+  const cat = await api('/api/catalog');
+  $('dec').innerHTML = '<option value="-1">выкл</option>' +
+    cat.decade.map(d => `<option value="${d.ch}">${d.label}</option>`).join('');
+  $('cmp').innerHTML = '<option value="-1">выкл</option>' +
+    cat.components.map(c => `<option value="${c.ch}">${c.label}</option>`).join('');
+
+  const faults = await api('/api/faults');
+  $('answer').innerHTML = '<option value="">— выберите диагноз —</option>' +
+    faults.map(f => `<option value="${f.id}">${f.title}</option>`).join('');
+}
+
+async function poll() {
+  try { render(await api('/api/state')); }
+  catch (e) {
+    if (++failures > 2) $('conn').textContent = 'нет связи со стендом';
+  }
+}
+
+boot().catch(e => $('scenarios').textContent = 'Ошибка загрузки: ' + e.message);
+poll();
+setInterval(poll, 1000);
+</script>
+</body>
+</html>
